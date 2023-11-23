@@ -9,16 +9,11 @@ import { PrismaModule } from '@app/libs/src/prisma/prisma.module';
 import { JwtHelperModule } from './jwt-helper/jwt-helper.module';
 import { repositoryModule } from './repositories/repository.module';
 import { AdminModule } from './admin/admin.module';
-import { citizenModule } from './citizen/citizen.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { childrenModule } from './children/children.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
-import { OrphanageController } from './orphanage/orphanage.controller';
-import { NgoModule } from './ngo/ngo.module';
-import { PoliceModule } from './police/police.module';
-import { DistrictModule } from './district/district.module';
-import { OrphanageModule } from './orphanage/orphanage.module';
+import { StudentModule } from './student/student.module';
+import { LecturerModule } from './lecturer/lecturer.module';
 
 @Module({
   imports: [
@@ -31,14 +26,10 @@ import { OrphanageModule } from './orphanage/orphanage.module';
     JwtHelperModule,
     AdminModule,
     repositoryModule,
-    childrenModule,
-    citizenModule,
     CloudinaryModule,
     EmailModule,
-    OrphanageModule,
-    NgoModule,
-    PoliceModule,
-    DistrictModule,
+    StudentModule,
+    LecturerModule,
   ],
   controllers: [AppController],
   providers: [

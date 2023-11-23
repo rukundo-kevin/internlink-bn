@@ -34,32 +34,6 @@ export class AdminService {
         email: data.email,
       });
 
-      if (data.role === 'POLICE') {
-        await this.prismaService.police.create({
-          data: {
-            province: data.province,
-            district: data.district,
-            sector: data.sector,
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-          },
-        });
-      } else {
-        await this.prismaService.districtAuthority.create({
-          data: {
-            district: data.district,
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-          },
-        });
-      }
-
       const activationToken = await this.jwtHelperService.generateAuthTokens(
         user.id,
       );

@@ -29,14 +29,6 @@ export class AuthService {
           },
         ],
       },
-      include: {
-        managers: true,
-        communities: true,
-        districtAuthorities: true,
-        citizens: true,
-        adoptionRequests: true,
-        police: true,
-      },
     });
     if (!user || !Password.comparePassword(password, user.password)) {
       throw new BadRequestException('Invalid username or password');
@@ -81,12 +73,12 @@ export class AuthService {
         token,
         ignoreExpiration: false,
       });
-      const existingUsr = await this.PrismaService.user.findFirst({
+      const existingUser = await this.PrismaService.user.findFirst({
         where: {
           id: userId,
         },
       });
-      if (existingUsr.state === 'VERIFIED') {
+      if (existingUser.state === 'VERIFIED') {
         throw new BadRequestException('User already verified');
       }
 
@@ -154,40 +146,8 @@ export class AuthService {
       email,
       password,
       gender,
-      role: data.type,
+      role: ROLE_ENUM.ORGANIZATION,
     });
-
-    if (data.type == ROLE_ENUM.NGO) {
-      await this.PrismaService.nGO.create({
-        data: {
-          ngoName: data.orgName,
-          province: data.province,
-          district: data.district,
-          sector: data.sector,
-          address: data.address,
-          manager: {
-            connect: {
-              id: newUser.id,
-            },
-          },
-        },
-      });
-    } else if (data.type == ROLE_ENUM.COMMUNITY) {
-      await this.PrismaService.orphanage.create({
-        data: {
-          communityName: data.orgName,
-          address: data.address,
-          province: data.province,
-          district: data.district,
-          sector: data.sector,
-          manager: {
-            connect: {
-              id: newUser.id,
-            },
-          },
-        },
-      });
-    }
 
     const activationToken = await this.jwtHelperService.generateAuthTokens(
       newUser.id,

@@ -67,7 +67,6 @@ const addOrgSchema = z.object({
         'Password must include at least one capital letter, one number, and one special character',
     },
   ),
-  type: z.nativeEnum(ROLE_ENUM),
   orgName: z.string().min(3).max(20),
   telephone: z.string(),
   province: z.string(),
