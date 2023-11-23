@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum STATE_ENUM {
+  FRESH
+  VERIFIED
+  DISABLED
+  DELETED
+}
+
+enum ROLE_ENUM {
+  ADMIN
+  CITIZEN
+  NGO
+  POLICE
+  DISTRICTAUTHORITY
+  COMMUNITY
+}
+
+enum CHILD_STATUS {
+  REPORTED
+  SUPPORT_REQUESTED
+  SUPPORT_APPROVED
+  ADOPTION_REQUESTED
+  ADOPTION_REJECTED
+  ADOPTION_APPROVED
+}
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  email String  @unique
+  telephone String? @unique
+  username  String? 
+  gender String?
+  password String
+  state STATE_ENUM @default(FRESH)
+  role ROLE_ENUM @default(CITIZEN)
+  managers NGO[]
+  police Police[]
+  districtAuthorities DistrictAuthority[]
+  communities Orphanage[]
+  citizens StreetChild[]
+  adoptionRequests Adoption_Request[]
+}
+
+model StreetChild {
+  id       Int       @id @default(autoincrement())
+  name     String
+  ageRange      String
+  gender   String
+  photo    String?
+  province String
+  district String
+  sector   String
+  description String
+  reportedBy Int
+  reporter   User @relation(fields: [reportedBy], references: [id], onDelete: Cascade)
+  orphanageId Int?
+  orphanage   Orphanage? @relation(fields: [orphanageId], references: [id], onDelete: Cascade)
+  status   String
+  adoptionRequests Adoption_Request[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  }
+
+model NGO {
+  id           Int       @id @default(autoincrement())
+  ngoName       String
+  ngoWebsite    String?
+  ngoDescription String?
+  province      String
+  district      String
+  sector        String
+  address      String
+  managerId  Int
+  manager    User @relation(fields: [managerId], references: [id], onDelete: Cascade) 
+  support Support_Request[]
+}
+
+model Police {
+  id                Int       @id @default(autoincrement())
+  province          String
+  district          String
+  sector            String  
+  userId           Int
+  user             User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DistrictAuthority {
+  id             Int       @id @default(autoincrement())
+  district   String @unique
+  userId         Int
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Adoption_Request {
+  id      Int       @id @default(autoincrement())
+  childId Int
+  child   StreetChild @relation(fields: [childId], references: [id], onDelete: Cascade)
+  requesterId   Int
+  user     User @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  status  String @default("Pending")
+  createdAt DateTime @default(now())
+}
+
+model Support_Request {
+   request_id Int @id @default(autoincrement())
+   ngo_id Int
+   ngo NGO @relation(fields: [ngo_id], references: [id], onDelete: Cascade)
+   orphanage_id Int
+   orphanage Orphanage @relation(fields: [orphanage_id], references: [id], onDelete: Cascade)
+   status CHILD_STATUS @default(REPORTED)
+}
+
+model Orphanage {
+  id            Int       @id @default(autoincrement())
+  communityName String
+  province      String
+  district      String
+  sector        String
+  address      String 
+  photo         String?
+  communityManager Int
+  manager        User @relation(fields: [communityManager], references: [id], onDelete: Cascade)
+  support Support_Request[]
+  children StreetChild[]
+}
