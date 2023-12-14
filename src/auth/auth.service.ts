@@ -30,6 +30,8 @@ export class AuthService {
         ],
       },
     });
+    console.log(user);
+    
     if (!user || !Password.comparePassword(password, user.password)) {
       throw new BadRequestException('Invalid username or password');
     }

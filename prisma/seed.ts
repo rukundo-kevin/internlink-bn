@@ -15,12 +15,16 @@ const seedUp = async () => {
         email: 'admin@gmail.com',
         username: 'Admin',
         password: 'Password@123',
+        firstName: 'Admin',
+        lastName: 'Admin',
         role: 'ADMIN',
         state: 'VERIFIED',
       },
       {
         email: 'student@gmail.com',
         username: 'student',
+        firstName: 'Student',
+        lastName: 'Student',
         password: 'Password@123',
         role: 'STUDENT',
         state: 'VERIFIED',
@@ -28,6 +32,8 @@ const seedUp = async () => {
       {
         email: 'lecturer@gmail.com',
         username: 'LECTURER',
+        firstName: 'Lecturer',
+        lastName: 'Lecturer',
         password: 'Password@123',
         role: 'LECTURER',
         state: 'VERIFIED',
@@ -37,9 +43,29 @@ const seedUp = async () => {
         username: 'Good Company',
         password: 'Password@123',
         role: 'ORGANIZATION',
+        firstName: 'Good',
+        lastName: 'Company',
         state: 'VERIFIED',
       },
     ],
+  });
+
+  const student = await prisma.user.findFirst({
+    where: {
+      role: 'STUDENT',
+    },
+  });
+
+  await prisma.student.create({
+    data: {
+      school: 'University of Kigali',
+      department: 'Computer Science',
+      user: {
+        connect: {
+          id: student.id,
+        },
+      },
+    },
   });
 };
 

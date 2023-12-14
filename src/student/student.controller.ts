@@ -10,8 +10,8 @@ export class StudentController {
     return this.studentService.createStudent();
   }
 
-  @Get()
+  @Get('/')
   async getStudent() {
-    return this.studentService.getStudent();
+    return this.studentService.getStudent({});
   }
 }

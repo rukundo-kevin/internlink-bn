@@ -17,6 +17,12 @@ enum STATE_ENUM {
   DELETED
 }
 
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum ROLE_ENUM {
   ADMIN
   STUDENT
@@ -27,6 +33,8 @@ enum ROLE_ENUM {
 model User {
   id    Int     @default(autoincrement()) @id
   email String  @unique
+  firstName String
+  lastName String
   telephone String? @unique
   username  String? 
   gender String?
@@ -36,23 +44,23 @@ model User {
   students Student[]
   lecturers Lecturer[]
   organizations Organization[]
-
 }
 
 model Student {
   id    Int     @default(autoincrement()) @id
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
   school String?
-  classId Int
+  department String?
+  applications Application[]
 }
 
 model Lecturer {
   id    Int     @default(autoincrement()) @id
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
   school String?
-  classId Int
+  department String?
 }
 
 model Organization {
@@ -64,16 +72,26 @@ model Organization {
   website String
   logo String
   userId Int
-  manager User @relation(fields: [userId], references: [id])  
+  manager User @relation(fields: [userId], references: [id], onDelete: Cascade)  
   internships Internship[]
 }
 
 model Internship {
   id    Int     @default(autoincrement()) @id
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId Int
   title String
   description String
   duration String
+  applications Application[]
 }
 
+model Application {
+  id   Int     @default(autoincrement()) @id
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId Int
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  internshipId Int
+  state ApplicationStatus @default(PENDING)
+  createdAt DateTime @default(now())
+}

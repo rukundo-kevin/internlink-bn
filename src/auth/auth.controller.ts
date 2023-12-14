@@ -1,4 +1,4 @@
-import { Controller, Body, Post } from '@nestjs/common';
+import { Controller, Body, Post, HttpCode } from '@nestjs/common';
 import { addOrgDto, loginDto, registerDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { Public } from 'src/guard/guard.decorator';
@@ -21,6 +21,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @HttpCode(200)
   async login(@Body() loginInputDto: loginDto) {
     const { user, tokens } =
       await this.authService.loginWithUsernameOrPassword(loginInputDto);
