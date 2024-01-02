@@ -26,8 +26,12 @@ enum ApplicationStatus {
 enum ROLE_ENUM {
   ADMIN
   STUDENT
-  LECTURER
-  ORGANIZATION
+  SUPERVISOR
+}
+
+enum InternshipStatus {
+  OPEN
+  CLOSED
 }
 
 model User {
@@ -42,8 +46,7 @@ model User {
   role ROLE_ENUM @default(STUDENT)
   state STATE_ENUM @default(FRESH)
   students Student[]
-  lecturers Lecturer[]
-  organizations Organization[]
+  evaluations Evaluation[]
 }
 
 model Student {
@@ -55,34 +58,20 @@ model Student {
   applications Application[]
 }
 
-model Lecturer {
-  id    Int     @default(autoincrement()) @id
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-  school String?
-  department String?
-}
-
-model Organization {
-  id    Int     @default(autoincrement()) @id
-  name String
-  address String
-  telephone String
-  email String
-  website String
-  logo String
-  userId Int
-  manager User @relation(fields: [userId], references: [id], onDelete: Cascade)  
-  internships Internship[]
-}
-
 model Internship {
   id    Int     @default(autoincrement()) @id
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId Int
   title String
   description String
   duration String
+  durationUnit String
+  deadline DateTime
+  department String
+  startDate DateTime?
+  photoUrl String?
+  documentUrl String?
+  status InternshipStatus @default(OPEN)
+  created DateTime @default(now())
+  updated DateTime @updatedAt
   applications Application[]
 }
 
@@ -94,4 +83,18 @@ model Application {
   internshipId Int
   state ApplicationStatus @default(PENDING)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  evaluations Evaluation[]
+}
+
+model Evaluation {
+  id   Int     @default(autoincrement()) @id
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId Int
+  supervisor User @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+  supervisorId Int
+  comment String?
+  score Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

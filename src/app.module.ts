@@ -14,7 +14,6 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
 import { StudentModule } from './student/student.module';
 import { LecturerModule } from './lecturer/lecturer.module';
-import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { OrganizationModule } from './organization/organization.module';
     EmailModule,
     StudentModule,
     LecturerModule,
-    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [

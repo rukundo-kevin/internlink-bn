@@ -18,4 +18,14 @@ export class StudentService {
   }
   async updateStudent() {}
   async deleteStudent() {}
+
+  async getInternships(filters?: Prisma.InternshipWhereInput) {
+    const internships = await this.prisma.internship.findMany({
+      where: filters,
+      include: {
+        applications: true,
+      },
+    });
+    return internships;
+  }
 }

@@ -9,6 +9,6 @@ export class AppController {
   @Post('/')
   @Public()
   index(): string {
-    return 'Welcome to Save Street children!';
+    return 'Welcome to Save InternLink!';
   }
 }

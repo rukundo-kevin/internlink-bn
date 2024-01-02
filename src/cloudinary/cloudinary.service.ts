@@ -10,7 +10,7 @@ export class CloudinaryService {
     return new Promise((resolve, reject) => {
       const upload = v2.uploader.upload_stream((error, result) => {
         if (error) {
-          console.log(error);
+          // console.log(error);
           return reject(error);
         }
         resolve(result);

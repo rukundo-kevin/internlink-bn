@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Post } from '@nestjs/common';
 import { UserRepository } from 'src/repositories/user/user.repository';
 import { createUserDto } from './dto/user.dto';
 import { Password } from 'src/auth/helpers/password';
@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/libs/src/prisma/prisma.service';
 import { JwtHelperService } from 'src/jwt-helper/jwt-helper.service';
 import { EmailService } from 'src/email/email.service';
+import { createInternshipDto } from 'src/student/dto/student.dto';
 
 @Injectable()
 export class AdminService {
@@ -18,20 +19,18 @@ export class AdminService {
 
   async createUser(data: createUserDto) {
     try {
-      const hashedPassword = await Password.hashPassword(
-        await Password.generateRandomPassword(),
-        10,
-      );
+      const password = await Password.generateRandomPassword();
+
       const username = `${data.firstname} ${data.lastname}`;
-      delete data.firstname;
-      delete data.lastname;
       const user = await this.userRepository.createUser({
         username,
-        password: hashedPassword,
+        password: password,
         role: data.role,
         gender: data.gender,
         telephone: data.telephone,
         email: data.email,
+        firstName: data.firstname,
+        lastName: data.lastname,
       });
 
       const activationToken = await this.jwtHelperService.generateAuthTokens(
@@ -46,15 +45,17 @@ export class AdminService {
       );
 
       return user;
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-
-      throw new BadRequestException('Error creating user');
+      throw new BadRequestException(error.message);
     }
   }
 
-  async getUsers() {
-    const users = await this.userRepository.getUsers();
+  async getUsers(filters?: Prisma.UserWhereInput) {
+    const users = await this.userRepository.getUsers({
+      ...filters,
+    });
+
     return users;
   }
 
@@ -66,5 +67,42 @@ export class AdminService {
   async updateUser(userId: number, data: Prisma.UserUpdateInput) {
     const user = await this.userRepository.updateUser(userId, data);
     return user;
+  }
+
+  async createInternship(
+    data: createInternshipDto & {
+      internshipPhoto?: string;
+      internshipFile?: string;
+    },
+  ) {
+    try {
+      const internship = await this.prismaService.internship.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          deadline: data.deadline,
+          photoUrl: data.internshipPhoto,
+          durationUnit: data.unit,
+          duration: data.duration,
+          documentUrl: data.internshipFile,
+          startDate: data.startDate,
+          department: data.department,
+        },
+      });
+
+      return internship;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Error creating internship');
+    }
+  }
+
+  async deleteInternship(id: number) {
+    const internship = await this.prismaService.internship.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    return internship;
   }
 }

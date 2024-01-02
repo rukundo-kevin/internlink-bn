@@ -18,8 +18,8 @@ export class EmailService {
 
     await this.mailerService.sendMail({
       to: user.email,
-      from: '"Save Street Children"',
-      subject: 'Welcome to save street children! Confirm your Email',
+      from: '"InternLink"',
+      subject: 'Welcome to internLink! Confirm your Email',
       template: './register',
       context: {
         name: user.name,
@@ -38,7 +38,7 @@ export class EmailService {
 
     await this.mailerService.sendMail({
       to: user.email,
-      from: '"Save Street Children"',
+      from: '"InternLink"',
       subject: 'Reset Password',
       template: './forgot-password',
       context: {

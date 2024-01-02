@@ -25,7 +25,7 @@ const dir = __dirname
           },
         },
         defaults: {
-          from: `"Save Street Children" `,
+          from: `"InternLink" `,
         },
         template: {
           dir: join(dir, 'dist/email/templates'),
