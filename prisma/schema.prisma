@@ -35,66 +35,113 @@ enum InternshipStatus {
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  firstName String
-  lastName String
-  telephone String? @unique
-  username  String? 
-  gender String?
-  password String
-  role ROLE_ENUM @default(STUDENT)
-  state STATE_ENUM @default(FRESH)
-  students Student[]
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  firstName   String
+  lastName    String
+  telephone   String?      @unique
+  username    String?
+  gender      String?
+  password    String
+  role        ROLE_ENUM    @default(STUDENT)
+  state       STATE_ENUM   @default(FRESH)
+  students    Student[]
   evaluations Evaluation[]
 }
 
 model Student {
-  id    Int     @default(autoincrement()) @id
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-  school String?
-  department String?
+  id           Int           @id @default(autoincrement())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  department   String?
+  skills       String[]
+  languages    String[]
+  photoUrl     String?
+  resumeUrl    String?
+  resumeName   String?
   applications Application[]
+  education    Education[]
+  experience   Experience[]
+  certificates Certificate[]
 }
 
 model Internship {
-  id    Int     @default(autoincrement()) @id
-  title String
-  description String
-  duration String
+  id           Int              @id @default(autoincrement())
+  title        String
+  description  String
+  duration     String
   durationUnit String
-  deadline DateTime
-  department String
-  startDate DateTime?
-  photoUrl String?
-  documentUrl String?
-  status InternshipStatus @default(OPEN)
-  created DateTime @default(now())
-  updated DateTime @updatedAt
+  deadline     DateTime
+  department   String
+  startDate    DateTime?
+  photoUrl     String?
+  documentUrl  String?
+  status       InternshipStatus @default(OPEN)
+  created      DateTime         @default(now())
+  updated      DateTime         @updatedAt
   applications Application[]
 }
 
 model Application {
-  id   Int     @default(autoincrement()) @id
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId Int
-  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  id           Int               @id @default(autoincrement())
+  student      Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    Int
+  internship   Internship        @relation(fields: [internshipId], references: [id], onDelete: Cascade)
   internshipId Int
-  state ApplicationStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  evaluations Evaluation[]
+  state        ApplicationStatus @default(PENDING)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  evaluations  Evaluation[]
 }
 
 model Evaluation {
-  id   Int     @default(autoincrement()) @id
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  id            Int         @id @default(autoincrement())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   applicationId Int
-  supervisor User @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
-  supervisorId Int
-  comment String?
-  score Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  supervisor    User        @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+  supervisorId  Int
+  comment       String?
+  score         Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Education {
+  id         Int      @id @default(autoincrement())
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId  Int
+  school     String
+  department String
+  startDate  DateTime
+  endDate    DateTime
+  degree     String
+  grade      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Experience {
+  id          Int      @id @default(autoincrement())
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   Int
+  title       String
+  company     String
+  startDate   DateTime
+  endDate     DateTime
+  location    String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certificate {
+  id           Int      @id @default(autoincrement())
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    Int
+  title        String
+  organization String
+  description  String?
+  documentUrl  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

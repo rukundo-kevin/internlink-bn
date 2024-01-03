@@ -37,6 +37,16 @@ export class UserRepository {
   async getUserId(userId: number): Promise<User | null> {
     return await this.prismaService.user.findFirst({
       where: { id: userId },
+      include: {
+        students: {
+          include: {
+            applications: true,
+            education: true,
+            experience: true,
+            certificates: true,
+          },
+        },
+      },
     });
   }
 
@@ -47,6 +57,16 @@ export class UserRepository {
           role: 'ADMIN',
         },
         ...filter,
+      },
+      include: {
+        students: {
+          include: {
+            applications: true,
+            education: true,
+            experience: true,
+            certificates: true,
+          },
+        },
       },
     });
   }

