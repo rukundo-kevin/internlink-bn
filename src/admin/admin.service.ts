@@ -22,16 +22,19 @@ export class AdminService {
       const password = await Password.generateRandomPassword();
 
       const username = `${data.firstname} ${data.lastname}`;
-      const user = await this.userRepository.createUser({
-        username,
-        password: password,
-        role: data.role,
-        gender: data.gender,
-        telephone: data.telephone,
-        email: data.email,
-        firstName: data.firstname,
-        lastName: data.lastname,
-      });
+      const user = await this.userRepository.createUser(
+        {
+          username,
+          password: password,
+          role: data.role,
+          gender: data.gender,
+          telephone: data.telephone,
+          email: data.email,
+          firstName: data.firstname,
+          lastName: data.lastname,
+        },
+        false,
+      );
 
       const activationToken = await this.jwtHelperService.generateAuthTokens(
         user.id,
@@ -40,6 +43,7 @@ export class AdminService {
         {
           email: user.email,
           name: user.username,
+          password
         },
         activationToken.accessToken,
       );
@@ -66,6 +70,8 @@ export class AdminService {
 
   async updateUser(userId: number, data: Prisma.UserUpdateInput) {
     const user = await this.userRepository.updateUser(userId, data);
+    console.log(data)
+    console.log(user)
     return user;
   }
 

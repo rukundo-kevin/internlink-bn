@@ -54,7 +54,7 @@ export class AdminController {
   async updateUser(
     @Param('userId', ParseIntPipe)
     userId: number,
-    data: any,
+    @Body() data: any,
   ) {
     const user = await this.adminService.updateUser(userId, data);
     return user;

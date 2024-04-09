@@ -54,6 +54,7 @@ model Student {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
   department   String?
+  school      String?
   skills       String[]
   languages    String[]
   photoUrl     String?
@@ -90,6 +91,7 @@ model Application {
   internshipId Int
   state        ApplicationStatus @default(PENDING)
   createdAt    DateTime          @default(now())
+  comment    String?
   updatedAt    DateTime          @updatedAt
   evaluations  Evaluation[]
 }

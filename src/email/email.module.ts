@@ -25,7 +25,7 @@ const dir = __dirname
           },
         },
         defaults: {
-          from: `"InternLink" `,
+          from: `"Internship Offer Management System" `,
         },
         template: {
           dir: join(dir, 'dist/email/templates'),

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -12,17 +13,19 @@ import {
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { User } from 'src/guard/user.decorator';
-import { Prisma, Student, User as UserType } from '@prisma/client';
+import { Prisma, ROLE_ENUM, Student, User as UserType } from '@prisma/client';
 import { Public } from 'src/guard/guard.decorator';
 import { createEducationDto, createExperienceDto } from './dto/student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { EmailService } from 'src/email/email.service';
 
 @Controller('student')
 export class StudentController {
   constructor(
     private readonly studentService: StudentService,
     private cloudinaryService: CloudinaryService,
+    private emailService: EmailService,
   ) {}
 
   @Post()
@@ -42,8 +45,7 @@ export class StudentController {
     @Query() query: any,
   ) {
     let filters: Prisma.InternshipWhereInput = {};
-
-    if (user.role === 'STUDENT') {
+    if (user.role === ROLE_ENUM.STUDENT) {
       filters = {
         applications: {
           every: {
@@ -54,8 +56,159 @@ export class StudentController {
         },
       };
     }
+    const internships = await this.studentService.getInternships(filters, user);
+    return internships;
+  }
 
-    return this.studentService.getInternships(filters);
+  @Post('/internship/:id/apply')
+  async applyInternship(
+    @User() user: UserType,
+    @Body() data: { comment: string },
+    @Param() id: any,
+  ) {
+    const application = await this.studentService.makeApplication(
+      user,
+      id?.id,
+      data?.comment,
+    );
+
+    const internship = application.internship.title;
+    await this.emailService.sendNewApplication(
+      {
+        email: user?.email,
+        name: user?.firstName,
+      },
+      internship,
+    );
+
+    return application;
+  }
+
+  @Get('/internship/:id/applications')
+  async getInternshipApplication(@Param('id') id: any) {
+    const application = await this.studentService.getApplications({
+      internship: {
+        id: Number(id),
+      },
+    });
+    return application;
+  }
+
+  @Get('/applications')
+  async getApplication(@User() user: UserType) {
+    let filters: Prisma.ApplicationWhereInput;
+    if (user.role === ROLE_ENUM.STUDENT) {
+      filters = {
+        student: {
+          userId: user.id,
+        },
+      };
+    }
+
+    const application = await this.studentService.getApplications(filters);
+    return application;
+  }
+
+  @Patch('/applications/:id/accept')
+  async acceptApplication(@Param('id') id: any) {
+    const application = await this.studentService.updateApplication(id, {
+      state: 'APPROVED',
+    });
+
+    const student = application.student.user;
+    const internship = application.internship.title;
+
+    await this.emailService.approveOrRejectApplication(
+      {
+        email: student.email,
+        name: student.firstName,
+      },
+      'APPROVED',
+      internship,
+    );
+
+    return application;
+  }
+
+  @Patch('/applications/:id/reject')
+  async rejectApplication(@Param('id') id: any) {
+    const application = await this.studentService.updateApplication(id, {
+      state: 'REJECTED',
+    });
+    const student = application.student.user;
+    const internship = application.internship.title;
+
+    await this.emailService.approveOrRejectApplication(
+      {
+        email: student.email,
+        name: student.firstName,
+      },
+      'REJECTED',
+      internship,
+    );
+
+    return application;
+  }
+
+  @Post('/evaluation')
+  async createEvaluation(
+    @User()
+    user: UserType & {
+      students: Student[];
+    },
+    @Body()
+    data: {
+      score: number;
+      comment: string;
+      studentId: number;
+      applicationId: number;
+    },
+  ) {
+    const evaluationData: Prisma.EvaluationCreateInput = {
+      comment: data.comment,
+      score: Number(data.score),
+      application: {
+        connect: {
+          id: data.applicationId,
+        },
+      },
+      supervisor: {
+        connect: {
+          id: user.id,
+        },
+      },
+    };
+    return this.studentService.createEvaluation(evaluationData);
+  }
+
+  @Delete('/evaluation/:id')
+  async deleteEvaluation(@Param('id') id: any) {
+    return await this.studentService.deleteEvaluation(Number(id));
+  }
+
+  @Get('/evaluation')
+  async getEvaluation(
+    @User()
+    user: UserType,
+  ) {
+    let filter: Prisma.EvaluationWhereInput;
+    if (user?.role == 'STUDENT') {
+      filter = {
+        application: {
+          student: {
+            userId: user.id,
+          },
+        },
+      };
+    } else if (user?.role == 'SUPERVISOR') {
+      filter = {
+        supervisor: {
+          id: user.id,
+        },
+      };
+    }
+    const evaluation = await this.studentService.getEvaluation(filter);
+    return evaluation;
   }
 
   @Post('/education')

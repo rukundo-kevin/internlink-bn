@@ -1,9 +1,0 @@
-<p>Hey <%= name %>,</p>
-<p>
-   Your request to adopt <%= childName %> was just approved!</p>
-
-
-<p>
-    Enjoy your new family!
-</p>
-

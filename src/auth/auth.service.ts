@@ -49,29 +49,44 @@ export class AuthService {
   }
 
   async register(registerInputDto: registerDto) {
-    const { username, email, password, gender } = registerInputDto;
+    const { username, email, password, gender, firstName, lastName } =
+      registerInputDto;
 
-    const newUser = await this.userRepository.createUser({
-      username,
-      email,
-      password,
-      gender,
-    });
+    try {
+      const newUser = await this.userRepository.createUser(
+        {
+          username,
+          email,
+          password,
+          gender,
+          firstName,
+          lastName,
+          role: ROLE_ENUM.STUDENT,
+        },
+        true,
+      );
 
-    delete newUser.password;
+      delete newUser.password;
 
-    const activationToken = await this.jwtHelperService.generateAuthTokens(
-      newUser.id,
-    );
-    await this.emailService.sendUserWelcome(
-      {
-        email: newUser.email,
-        name: newUser.username,
-      },
-      activationToken.accessToken,
-    );
+      const activationToken = await this.jwtHelperService.generateAuthTokens(
+        newUser.id,
+      );
+      await this.emailService.sendUserWelcome(
+        {
+          email: newUser.email,
+          name: newUser.username,
+          password,
+        },
+        activationToken.accessToken,
+      );
 
-    return newUser;
+      return newUser;
+    } catch (error: any) {
+      console.log(error);
+      throw new BadRequestException(
+        error?.length > 200 ? 'Problem creating user' : error.message,
+      );
+    }
   }
 
   async activateAccount(token: string) {
@@ -148,13 +163,16 @@ export class AuthService {
   async addOrg(data: addOrgDto) {
     const { username, email, password, gender } = data;
 
-    const newUser = await this.userRepository.createUser({
-      username,
-      email,
-      password,
-      gender,
-      role: ROLE_ENUM.SUPERVISOR,
-    });
+    const newUser = await this.userRepository.createUser(
+      {
+        username,
+        email,
+        password,
+        gender,
+        role: ROLE_ENUM.SUPERVISOR,
+      },
+      false,
+    );
 
     const activationToken = await this.jwtHelperService.generateAuthTokens(
       newUser.id,
@@ -164,6 +182,7 @@ export class AuthService {
       {
         email: newUser.email,
         name: newUser.username,
+        password: password,
       },
       activationToken.accessToken,
     );

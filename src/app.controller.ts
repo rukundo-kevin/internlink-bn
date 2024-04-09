@@ -9,6 +9,6 @@ export class AppController {
   @Post('/')
   @Public()
   index(): string {
-    return 'Welcome to Save InternLink!';
+    return 'Welcome to Save Internship Offer Management System!';
   }
 }
